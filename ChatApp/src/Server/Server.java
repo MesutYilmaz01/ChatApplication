@@ -5,6 +5,7 @@
  */
 package Server;
 
+import Message.Message;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -36,11 +37,11 @@ public class Server {
     }
 
 
-    public void Send(String msg) {
+    public void Send(Message msg) {
 
         for (ServerClient c : Clients) {
             try {
-                c.sOutput.writeUTF(msg);
+                c.sOutput.writeObject(msg);
                 
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);

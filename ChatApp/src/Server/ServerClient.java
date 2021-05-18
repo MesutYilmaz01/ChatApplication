@@ -5,6 +5,7 @@
  */
 package Server;
 
+import Message.Message;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,7 +24,7 @@ public class ServerClient {
     ObjectOutputStream sOutput;
     ObjectInputStream sInput;
     Listen listen;
-    public String name = "User" + id;
+    String name = "";
 
     public ServerClient(Socket _socket, int _id, Server _server) {
         server = _server;
@@ -64,15 +65,21 @@ class Listen extends Thread {
         while (Client.socket.isConnected()) {
             try {
                 System.out.println("dinlemedeyim.");
-                String recieved = "d";
                 try {
-                    recieved = (Client.sInput.readObject()).toString();
-                    System.out.println(recieved);
-                    System.out.println("dinlemeye devam");
+                    Message received = (Message) (Client.sInput.readObject());
+                    
+                    switch (received.type) {
+                        case Name:
+                            Client.name = received.content.toString();
+                            break;
+                        case Text:
+                            received.content = Client.name+" : "+ received.content.toString();
+                            server.Send(received);
+                            break;
+                    }
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                server.Send(recieved);
             } catch (IOException ex) {
                 Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
             }

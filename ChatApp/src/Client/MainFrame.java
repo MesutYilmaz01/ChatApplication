@@ -5,19 +5,23 @@
  */
 package Client;
 
+import Message.Message;
+
 /**
  *
  * @author mesut
  */
 public class MainFrame extends javax.swing.JFrame {
-public Client c;
+
+    public Client c;
+
     /**
      * Creates new form MainFrame
      */
     public MainFrame(Client _c) {
         initComponents();
         c = _c;
-        
+
     }
 
     private MainFrame() {
@@ -131,9 +135,12 @@ public Client c;
 
     private void SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendActionPerformed
         // TODO add your handling code here:
-        c.Send(message.getText());
+        Message msg = new Message(Message.messageType.Text);
+        msg.content = message.getText();
+        c.Send(msg);
+        message.setText("");
     }//GEN-LAST:event_SendActionPerformed
-    
+
     /**
      * @param args the command line arguments
      */

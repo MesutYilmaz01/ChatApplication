@@ -5,6 +5,7 @@
  */
 package Client;
 
+import Message.Message;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,7 +24,7 @@ public class Client {
     public ObjectOutputStream sOutput;
     public Listen listen;
     public MainFrame mf;
-    
+
     public void Start(String ip, int port, Entry e, String userName) {
         e.setVisible(false);
         mf = new MainFrame(this);
@@ -35,15 +36,17 @@ public class Client {
             sOutput = new ObjectOutputStream(socket.getOutputStream());
             listen = new Listen(this);
             listen.start();
-            
-            String myName = "Mesut";
-            
+
+            Message name = new Message(Message.messageType.Name);
+            name.content = userName;
+            Send(name);
+
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void Stop(){
+
+    public void Stop() {
         if (socket != null) {
             try {
                 sOutput.flush();
@@ -54,11 +57,10 @@ public class Client {
             }
         }
     }
-    
-    public void Send(String msg) {
+
+    public void Send(Message msg) {
         try {
-            System.out.println("geliyor");
-            System.out.println(msg);
+            String deneme = msg.content.toString();
             sOutput.writeObject(msg);
             sOutput.flush();
         } catch (IOException ex) {
@@ -67,24 +69,32 @@ public class Client {
 
     }
 }
-class Listen extends Thread{
+
+class Listen extends Thread {
+
     Client client;
-    Listen(Client _client){
+    String temp = "";
+
+    Listen(Client _client) {
         client = _client;
     }
-    
+
     @Override
-    public void run(){
-        while(client.socket.isConnected()){
+    public void run() {
+        String temp = "";
+        while (client.socket.isConnected()) {
             try {
-                String received = "içi boş client";
-                try {
-                    received = (client.sInput.readObject()).toString();
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
+                Message received = (Message) (client.sInput.readObject());
+                switch (received.type) {
+                    case Name:
+                        break;
+                    case Text:
+                        temp += received.content.toString() + "\n";
+                        client.mf.chat.setText(temp);
                 }
-                System.out.println(received);
             } catch (IOException ex) {
+                Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
                 Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
