@@ -22,10 +22,11 @@ public class Client {
     public ObjectInputStream sInput;
     public ObjectOutputStream sOutput;
     public Listen listen;
-    public MainFrame mf = new MainFrame();
+    public MainFrame mf;
     
-    public void Start(String ip, int port, Entry e) {
+    public void Start(String ip, int port, Entry e, String userName) {
         e.setVisible(false);
+        mf = new MainFrame(this);
         mf.setVisible(true);
         try {
             socket = new Socket(ip, port);
@@ -56,7 +57,10 @@ public class Client {
     
     public void Send(String msg) {
         try {
+            System.out.println("geliyor");
+            System.out.println(msg);
             sOutput.writeObject(msg);
+            sOutput.flush();
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -73,7 +77,12 @@ class Listen extends Thread{
     public void run(){
         while(client.socket.isConnected()){
             try {
-                String received = client.sInput.readUTF();
+                String received = "içi boş client";
+                try {
+                    received = (client.sInput.readObject()).toString();
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 System.out.println(received);
             } catch (IOException ex) {
                 Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);

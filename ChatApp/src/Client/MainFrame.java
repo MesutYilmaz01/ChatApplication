@@ -10,12 +10,18 @@ package Client;
  * @author mesut
  */
 public class MainFrame extends javax.swing.JFrame {
-
+public Client c;
     /**
      * Creates new form MainFrame
      */
-    public MainFrame() {
+    public MainFrame(Client _c) {
         initComponents();
+        c = _c;
+        
+    }
+
+    private MainFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -56,6 +62,11 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane3.setViewportView(message);
 
         Send.setText("Gönder");
+        Send.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SendActionPerformed(evt);
+            }
+        });
 
         listPrivateRooms.setText("Özel Odaları Listele");
 
@@ -118,6 +129,11 @@ public class MainFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendActionPerformed
+        // TODO add your handling code here:
+        c.Send(message.getText());
+    }//GEN-LAST:event_SendActionPerformed
+    
     /**
      * @param args the command line arguments
      */

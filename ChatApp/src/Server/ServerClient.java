@@ -40,7 +40,7 @@ public class ServerClient {
 
     public void Send(String message) {
         try {
-            sOutput.writeObject(message);
+            sOutput.writeUTF(message);
         } catch (IOException ex) {
             Logger.getLogger(ServerClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -63,7 +63,15 @@ class Listen extends Thread {
     public void run() {
         while (Client.socket.isConnected()) {
             try {
-                String recieved = Client.sInput.readUTF();
+                System.out.println("dinlemedeyim.");
+                String recieved = "d";
+                try {
+                    recieved = (Client.sInput.readObject()).toString();
+                    System.out.println(recieved);
+                    System.out.println("dinlemeye devam");
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 server.Send(recieved);
             } catch (IOException ex) {
                 Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);

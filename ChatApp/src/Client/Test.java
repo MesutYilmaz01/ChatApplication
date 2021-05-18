@@ -12,6 +12,6 @@ package Client;
 public class Test {
     public static void main(String[] args) {
         Entry e = new Entry();
-        
+        e.setVisible(true);
     }
 }

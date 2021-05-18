@@ -117,7 +117,7 @@ public class Entry extends javax.swing.JFrame {
     private void ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConnectActionPerformed
         // TODO add your handling code here:
         Client c = new Client();
-        c.Start(ip.getText(), Integer.parseInt(port.getText()), this);
+        c.Start(ip.getText(), Integer.parseInt(port.getText()), this, userName1.getText());
     }//GEN-LAST:event_ConnectActionPerformed
 
     private void userName1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userName1ActionPerformed

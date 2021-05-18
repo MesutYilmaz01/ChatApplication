@@ -41,6 +41,7 @@ public class Server {
         for (ServerClient c : Clients) {
             try {
                 c.sOutput.writeUTF(msg);
+                
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
