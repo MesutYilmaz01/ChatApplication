@@ -6,10 +6,13 @@
 package Server;
 
 import Message.Message;
+import Message.Message.messageType;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +21,7 @@ import java.util.logging.Logger;
  * @author mesut
  */
 public class ServerClient {
+
     Server server;
     int id = 0;
     Socket socket;
@@ -36,12 +40,12 @@ public class ServerClient {
         } catch (IOException ex) {
             Logger.getLogger(ServerClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        listen = new Listen(this,server);
+        listen = new Listen(this, server);
     }
 
-    public void Send(String message) {
+    public void Send(Message message) {
         try {
-            sOutput.writeUTF(message);
+            sOutput.writeObject(message);
         } catch (IOException ex) {
             Logger.getLogger(ServerClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -67,13 +71,24 @@ class Listen extends Thread {
                 System.out.println("dinlemedeyim.");
                 try {
                     Message received = (Message) (Client.sInput.readObject());
-                    
+
                     switch (received.type) {
                         case Name:
                             Client.name = received.content.toString();
+                            Message clients = new Message(messageType.ConnectedClients);
+                            ArrayList<String> users = new ArrayList<String>();
+                            for (int i = 0; i < server.Clients.size(); i++) {
+                                
+                                users.add(server.Clients.get(i).name);
+                            }
+                            clients.content = users;
+                            
+                            server.Send(clients);
                             break;
+                        case ChatGroupConnection:
+                            server.Send(received);
                         case Text:
-                            received.content = Client.name+" : "+ received.content.toString();
+                            received.content = Client.name + " : " + received.content.toString();
                             server.Send(received);
                             break;
                     }

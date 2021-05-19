@@ -5,13 +5,17 @@
  */
 package Client;
 
+import GroupChat.ChatFrame;
 import Message.Message;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 
 /**
  *
@@ -24,11 +28,13 @@ public class Client {
     public ObjectOutputStream sOutput;
     public Listen listen;
     public MainFrame mf;
-
-    public void Start(String ip, int port, Entry e, String userName) {
+    public ArrayList<ChatFrame> chatFrameList ;
+    public String userName;
+    public void Start(String ip, int port, Entry e, String _userName) {
         e.setVisible(false);
         mf = new MainFrame(this);
         mf.setVisible(true);
+        chatFrameList = new ArrayList<ChatFrame>();
         try {
             socket = new Socket(ip, port);
             System.out.println("Servera Bağlandım!");
@@ -36,7 +42,7 @@ public class Client {
             sOutput = new ObjectOutputStream(socket.getOutputStream());
             listen = new Listen(this);
             listen.start();
-
+            userName = _userName;
             Message name = new Message(Message.messageType.Name);
             name.content = userName;
             Send(name);
@@ -60,7 +66,6 @@ public class Client {
 
     public void Send(Message msg) {
         try {
-            String deneme = msg.content.toString();
             sOutput.writeObject(msg);
             sOutput.flush();
         } catch (IOException ex) {
@@ -73,7 +78,7 @@ public class Client {
 class Listen extends Thread {
 
     Client client;
-    String temp = "";
+    
 
     Listen(Client _client) {
         client = _client;
@@ -81,15 +86,55 @@ class Listen extends Thread {
 
     @Override
     public void run() {
-        String temp = "";
         while (client.socket.isConnected()) {
             try {
                 Message received = (Message) (client.sInput.readObject());
                 switch (received.type) {
                     case Name:
                         break;
+                    case ConnectedClients:
+                        ArrayList<String> users = (ArrayList<String>) (received.content);
+                        DefaultListModel<String> model = new DefaultListModel<String>();
+                        for (int i = 0; i < users.size(); i++) {
+                            model.add(i, users.get(i));
+                            System.out.println(users.get(i)+"\n");
+                        }
+                        client.mf.userList.setModel(model);
+                        System.out.println("ConnectedClient tetiklendi." + client.userName);
+ 
+                        break;
+                    case ChatGroupConnection:
+                        boolean append = true;
+                        for(int i = 0; i< client.chatFrameList.size(); i++){
+                            System.out.println();
+                            ChatFrame cf = client.chatFrameList.get(i);
+                            if(cf.owner.contains(received.owner))
+                            {
+                                String text = "";
+                                text = cf.chatField.getText();
+                                String newMsg = received.owner + " : " + received.content.toString() + "\n";
+                                cf.chatField.setText(text + newMsg);
+                                append = false;
+                                System.out.println("1");
+                            }
+                        }
+                        if(append){
+                            client.chatFrameList.add(new ChatFrame(client, received.userList));
+                            int newCFrameIndex = client.chatFrameList.size() - 1; 
+                            String newMsg = received.owner + " : " + received.content.toString() + "\n";
+                            client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
+                            client.chatFrameList.get(newCFrameIndex).owner=received.owner;
+                            client.chatFrameList.get(newCFrameIndex).setVisible(true);
+                            System.out.println("2");
+                        }
+                        append=true;
+                        System.out.println("ChatFram tetiklendi." + client.userName);
+                        break;
                     case Text:
-                        temp += received.content.toString() + "\n";
+                        String temp = client.mf.chat.getText();
+                        temp += received.owner + " x " + received.content.toString() + "\n";
+                        System.out.println("Text tetiklendi." + client.userName);
+ 
                         client.mf.chat.setText(temp);
                 }
             } catch (IOException ex) {

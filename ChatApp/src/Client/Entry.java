@@ -37,6 +37,8 @@ public class Entry extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        port.setText("1999");
+
         Connect.setText("Bağlan");
         Connect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -51,6 +53,8 @@ public class Entry extends javax.swing.JFrame {
                 userName1ActionPerformed(evt);
             }
         });
+
+        ip.setText("127.0.0.1");
 
         jLabel2.setText(" Port :");
 

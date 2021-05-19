@@ -36,13 +36,16 @@ public class Server {
         }
     }
 
-
     public void Send(Message msg) {
 
         for (ServerClient c : Clients) {
             try {
-                c.sOutput.writeObject(msg);
-                
+                if (msg.userList == null) {
+                    c.sOutput.writeObject(msg);
+                } else if (msg.userList.contains(c.name)) {
+                    c.sOutput.writeObject(msg);
+                }
+
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }

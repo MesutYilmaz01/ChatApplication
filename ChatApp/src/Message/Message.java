@@ -5,15 +5,19 @@
  */
 package Message;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 /**
  *
  * @author mesut
  */
 public class Message implements java.io.Serializable{
-    public enum messageType {Name,Text};
+    public enum messageType {Name,Text,ConnectedClients, ChatGroupConnection};
     public messageType type;
+    public String owner;
     public Object content;
-    
+    public ArrayList<String> userList;
     public Message(messageType _type){
         type = _type;
     }
