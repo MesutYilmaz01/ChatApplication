@@ -87,6 +87,7 @@ class Listen extends Thread {
     @Override
     public void run() {
         while (client.socket.isConnected()) {
+            System.out.println("Soket Mesaj Aldı..");
             try {
                 Message received = (Message) (client.sInput.readObject());
                 switch (received.type) {
@@ -100,15 +101,15 @@ class Listen extends Thread {
                             System.out.println(users.get(i)+"\n");
                         }
                         client.mf.userList.setModel(model);
-                        System.out.println("ConnectedClient tetiklendi." + client.userName);
- 
+                        client.mf.user.setText(client.userName);
+                        
                         break;
                     case ChatGroupConnection:
                         boolean append = true;
-                        for(int i = 0; i< client.chatFrameList.size(); i++){
-                            System.out.println();
+                        for(int i = 0; i< client.chatFrameList.size(); i++){ 
+                           System.out.println();
                             ChatFrame cf = client.chatFrameList.get(i);
-                            if(cf.owner.contains(received.owner))
+                            if(cf.owner.equals(received.userList.contains(cf.owner)))
                             {
                                 String text = "";
                                 text = cf.chatField.getText();
@@ -119,11 +120,15 @@ class Listen extends Thread {
                             }
                         }
                         if(append){
-                            client.chatFrameList.add(new ChatFrame(client, received.userList));
+                            ArrayList<String> tmpChatUserList = new ArrayList<String>();
+                            tmpChatUserList.add(client.userName);
+                            tmpChatUserList.add(received.owner);
+                            client.chatFrameList.add(new ChatFrame(client, tmpChatUserList));
                             int newCFrameIndex = client.chatFrameList.size() - 1; 
                             String newMsg = received.owner + " : " + received.content.toString() + "\n";
                             client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
-                            client.chatFrameList.get(newCFrameIndex).owner=received.owner;
+                            //client.chatFrameList.get(newCFrameIndex).owner=received.userList.get(0);
+                            
                             client.chatFrameList.get(newCFrameIndex).setVisible(true);
                             System.out.println("2");
                         }

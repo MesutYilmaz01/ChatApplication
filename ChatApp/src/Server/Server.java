@@ -44,6 +44,7 @@ public class Server {
                     c.sOutput.writeObject(msg);
                 } else if (msg.userList.contains(c.name)) {
                     c.sOutput.writeObject(msg);
+                    System.out.println("server send içindeyim");
                 }
 
             } catch (IOException ex) {
