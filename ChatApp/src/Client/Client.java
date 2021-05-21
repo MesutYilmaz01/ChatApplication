@@ -91,8 +91,6 @@ class Listen extends Thread {
             try {
                 Message received = (Message) (client.sInput.readObject());
                 switch (received.type) {
-                    case Name:
-                        break;
                     case ConnectedClients:
                         ArrayList<String> users = (ArrayList<String>) (received.content);
                         DefaultListModel<String> model = new DefaultListModel<String>();
@@ -102,14 +100,13 @@ class Listen extends Thread {
                         }
                         client.mf.userList.setModel(model);
                         client.mf.user.setText(client.userName);
-                        
                         break;
                     case ChatGroupConnection:
                         boolean append = true;
                         for(int i = 0; i< client.chatFrameList.size(); i++){ 
                            System.out.println();
                             ChatFrame cf = client.chatFrameList.get(i);
-                            if(cf.owner.equals(received.userList.contains(cf.owner)))
+                            if(received.userList.contains(cf.owner))
                             {
                                 String text = "";
                                 text = cf.chatField.getText();
@@ -127,7 +124,6 @@ class Listen extends Thread {
                             int newCFrameIndex = client.chatFrameList.size() - 1; 
                             String newMsg = received.owner + " : " + received.content.toString() + "\n";
                             client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
-                            //client.chatFrameList.get(newCFrameIndex).owner=received.userList.get(0);
                             
                             client.chatFrameList.get(newCFrameIndex).setVisible(true);
                             System.out.println("2");
@@ -137,10 +133,10 @@ class Listen extends Thread {
                         break;
                     case Text:
                         String temp = client.mf.chat.getText();
-                        temp += received.owner + " x " + received.content.toString() + "\n";
+                        temp += received.content.toString() + "\n";
                         System.out.println("Text tetiklendi." + client.userName);
- 
                         client.mf.chat.setText(temp);
+                        break;
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Listen.class.getName()).log(Level.SEVERE, null, ex);

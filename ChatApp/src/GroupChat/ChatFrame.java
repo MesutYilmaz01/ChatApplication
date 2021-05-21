@@ -18,16 +18,16 @@ public class ChatFrame extends javax.swing.JFrame {
     /**
      * Creates new form ChatFrame
      */
-    
     public String owner;
     public Client client;
     public ArrayList<String> userList;
+    public boolean flag = true;
     public ChatFrame(Client _client, ArrayList<String> _userList) {
         initComponents();
         client = _client;
         owner = client.userName;
         userList = _userList;
-        sender.setText(owner); 
+        sender.setText(owner);
         receiver.setText(userList.get(1));
     }
 
@@ -139,7 +139,16 @@ public class ChatFrame extends javax.swing.JFrame {
         msg.content = message.getText();
         msg.owner = owner;
         msg.userList = userList;
-        client.chatFrameList.add(this);
+        //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
+        for (int i = 0; i < client.chatFrameList.size(); i++) {
+            if (client.chatFrameList.contains(this)) {
+                flag = false;
+            }
+        }
+        if (flag) {
+            client.chatFrameList.add(this); //her mesaj göndermede bunu clientliste ekleme problem
+            flag = false;
+        }
         client.Send(msg);
     }//GEN-LAST:event_sendActionPerformed
 

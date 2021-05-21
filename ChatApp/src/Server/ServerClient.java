@@ -82,11 +82,11 @@ class Listen extends Thread {
                                 users.add(server.Clients.get(i).name);
                             }
                             clients.content = users;
-                            
                             server.Send(clients);
                             break;
                         case ChatGroupConnection:
                             server.Send(received);
+                            break;
                         case Text:
                             received.content = Client.name + " : " + received.content.toString();
                             server.Send(received);
