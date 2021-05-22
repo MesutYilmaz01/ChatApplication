@@ -7,12 +7,14 @@ package GroupChat;
 
 import Client.Client;
 import java.util.ArrayList;
+import javax.swing.DefaultListModel;
 
 /**
  *
  * @author mesut
  */
 public class ChatRoom {
+
     public String roomName;
     public ArrayList<String> userList;
     public ChatFrame frame;

@@ -12,6 +12,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -78,8 +80,8 @@ public class Client {
 class Listen extends Thread {
 
     Client client;
+    DefaultListModel<String> modelRoomList = new DefaultListModel<String> ();
     
-
     Listen(Client _client) {
         client = _client;
     }
@@ -87,9 +89,9 @@ class Listen extends Thread {
     @Override
     public void run() {
         while (client.socket.isConnected()) {
-            System.out.println("Soket Mesaj Aldı..");
             try {
                 Message received = (Message) (client.sInput.readObject());
+                System.out.println("Soket Mesaj Aldı.."+received.type);
                 switch (received.type) {
                     case ConnectedClients:
                         ArrayList<String> users = (ArrayList<String>) (received.content);
@@ -100,6 +102,17 @@ class Listen extends Thread {
                         }
                         client.mf.userList.setModel(model);
                         client.mf.user.setText(client.userName);
+                        
+                        // Set Private room list
+                        
+                        int roomIndex  =0;
+                        
+                        for(Map.Entry<String, ArrayList<String>> room : received.roomList.entrySet())
+                        {
+                                modelRoomList.add(roomIndex++, room.getKey());
+                        }
+                        client.mf.roomList.setModel(modelRoomList);
+                        
                         break;
                     case ChatGroupConnection:
                         boolean append = true;
@@ -130,6 +143,23 @@ class Listen extends Thread {
                         }
                         append=true;
                         System.out.println("ChatFram tetiklendi." + client.userName);
+                        break;
+                    case PrivateRoomList:
+                        System.out.println("privateRoomList run => " + received.roomName);
+                        modelRoomList.add(modelRoomList.size(), received.roomName);
+                        client.mf.roomList.setModel(modelRoomList);
+                        break;
+                    case PrivateRoomUpdated:
+                         for (int i = 0; i < client.chatFrameList.size(); i++) {
+                            if(client.chatFrameList.get(i).roomName.equals(received.roomName))
+                            {
+                                DefaultListModel<String> dm = new DefaultListModel<>();
+                                for (int j = 0; j < received.roomList.get(received.roomName).size(); j++) {
+                                    dm.add(j, received.roomList.get(received.roomName).get(j));
+                                }
+                                client.chatFrameList.get(i).users.setModel(dm);
+                            }
+                        }
                         break;
                     case Text:
                         String temp = client.mf.chat.getText();

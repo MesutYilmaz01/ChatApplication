@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +26,8 @@ public class Server {
     public ServerListen listenThread;
     public int clientCount = 0;
     public ArrayList<ServerClient> Clients = new ArrayList<>();
-
+    public HashMap<String, ArrayList<String> > roomList = new HashMap<String, ArrayList<String>>();
+    
     public Server(int _port) {
         try {
             port = _port;
@@ -40,13 +43,14 @@ public class Server {
 
         for (ServerClient c : Clients) {
             try {
+                System.out.println("Server.Server.Send() => " + msg.type);
                 if (msg.userList == null) {
                     c.sOutput.writeObject(msg);
                 } else if (msg.userList.contains(c.name)) {
                     c.sOutput.writeObject(msg);
                     System.out.println("server send içindeyim");
                 }
-
+                             
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }

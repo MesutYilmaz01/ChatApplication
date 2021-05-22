@@ -32,7 +32,6 @@ public class ChatFrame extends javax.swing.JFrame {
         sender.setText(client.userName);
         receiver.setText(roomName);
     }
-
     private ChatFrame() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -142,6 +141,7 @@ public class ChatFrame extends javax.swing.JFrame {
         msg.owner = owner;
         msg.userList = userList;
         //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
+        
         for (int i = 0; i < client.chatFrameList.size(); i++) {
             if (client.chatFrameList.contains(this)) {
                 flag = false;
@@ -152,6 +152,7 @@ public class ChatFrame extends javax.swing.JFrame {
             flag = false;
         }
         client.Send(msg);
+        message.setText("");
     }//GEN-LAST:event_sendActionPerformed
 
     /**

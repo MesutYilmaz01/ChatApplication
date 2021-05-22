@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,10 +82,30 @@ class Listen extends Thread {
                                 users.add(server.Clients.get(i).name);
                             }
                             clients.content = users;
+                            clients.roomList = server.roomList;
+                            
                             server.Send(clients);
+                            
                             break;
                         case ChatGroupConnection:
                             server.Send(received);
+                            break;
+                        case PrivateRoomCreated:
+                            server.roomList.put(received.roomName, received.userList);
+                            Message msg = new Message(Message.messageType.PrivateRoomList);
+                            msg.roomName = received.roomName;
+                            server.Send(msg);
+                            break;
+                        case PrivateRoomJoin:
+                            ArrayList<String> tmp = server.roomList.get(received.roomName);
+                            tmp.add(received.owner);
+                            server.roomList.put(received.roomName, tmp);
+                            Message roomInfo = new Message(Message.messageType.PrivateRoomUpdated);
+                            roomInfo.roomName = received.roomName;
+                            roomInfo.roomList = server.roomList;
+                            server.Send(roomInfo);
+
+                            
                             break;
                         case Text:
                             received.content = Client.name + " : " + received.content.toString();
