@@ -71,7 +71,6 @@ class Listen extends Thread {
                 System.out.println("dinlemedeyim.");
                 try {
                     Message received = (Message) (Client.sInput.readObject());
-
                     switch (received.type) {
                         case Name:
                             Client.name = received.content.toString();

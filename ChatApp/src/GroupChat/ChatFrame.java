@@ -20,15 +20,17 @@ public class ChatFrame extends javax.swing.JFrame {
      */
     public String owner;
     public Client client;
+    public String roomName;
     public ArrayList<String> userList;
     public boolean flag = true;
-    public ChatFrame(Client _client, ArrayList<String> _userList) {
+    public ChatFrame(Client _client, ArrayList<String> _userList, String _roomName) {
         initComponents();
         client = _client;
         owner = client.userName;
+        roomName = _roomName;
         userList = _userList;
-        sender.setText(owner);
-        receiver.setText(userList.get(1));
+        sender.setText(client.userName);
+        receiver.setText(roomName);
     }
 
     private ChatFrame() {

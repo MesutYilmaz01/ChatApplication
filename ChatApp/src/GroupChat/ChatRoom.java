@@ -17,12 +17,12 @@ public class ChatRoom {
     public ArrayList<String> userList;
     public ChatFrame frame;
     public Client client;
-    public ChatRoom( ArrayList<String> _userList, String roomName, Client _client)
+    public ChatRoom( ArrayList<String> _userList, String _roomName, Client _client)
     {
-        roomName = roomName;
+        roomName = _roomName;
         userList = _userList;
         client = _client;
-        frame = new ChatFrame(client, userList);
+        frame = new ChatFrame(client, userList, roomName);
         frame.setVisible(true);        
     }
 }

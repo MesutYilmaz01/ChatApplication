@@ -106,7 +106,7 @@ class Listen extends Thread {
                         for(int i = 0; i< client.chatFrameList.size(); i++){ 
                            System.out.println();
                             ChatFrame cf = client.chatFrameList.get(i);
-                            if(received.userList.contains(cf.owner))
+                            if(received.userList.contains(cf.roomName))
                             {
                                 String text = "";
                                 text = cf.chatField.getText();
@@ -120,7 +120,7 @@ class Listen extends Thread {
                             ArrayList<String> tmpChatUserList = new ArrayList<String>();
                             tmpChatUserList.add(client.userName);
                             tmpChatUserList.add(received.owner);
-                            client.chatFrameList.add(new ChatFrame(client, tmpChatUserList));
+                            client.chatFrameList.add(new ChatFrame(client, tmpChatUserList, received.owner));
                             int newCFrameIndex = client.chatFrameList.size() - 1; 
                             String newMsg = received.owner + " : " + received.content.toString() + "\n";
                             client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
