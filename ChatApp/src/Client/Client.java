@@ -154,9 +154,12 @@ class Listen extends Thread {
                             if(client.chatFrameList.get(i).roomName.equals(received.roomName))
                             {
                                 DefaultListModel<String> dm = new DefaultListModel<>();
-                                for (int j = 0; j < received.roomList.get(received.roomName).size(); j++) {
-                                    dm.add(j, received.roomList.get(received.roomName).get(j));
+                                for (int j = 0; j < received.roomListforPrivate.length; j++) {
+                                    dm.add(j, received.roomListforPrivate[j]);
                                 }
+//                                for (int j = 0; j < received.roomList.get(received.roomName).size(); j++) {
+//                                    dm.add(j, received.roomList.get(received.roomName).get(j));
+//                                }
                                 client.chatFrameList.get(i).users.setModel(dm);
                             }
                         }

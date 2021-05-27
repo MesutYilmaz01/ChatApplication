@@ -91,18 +91,24 @@ class Listen extends Thread {
                             server.Send(received);
                             break;
                         case PrivateRoomCreated:
-                            server.roomList.put(received.roomName, received.userList);
+                            server.roomList.put(received.roomName, new ArrayList<String>());
                             Message msg = new Message(Message.messageType.PrivateRoomList);
                             msg.roomName = received.roomName;
-                            server.Send(msg);
+                              server.Send(msg);
                             break;
                         case PrivateRoomJoin:
-                            ArrayList<String> tmp = server.roomList.get(received.roomName);
-                            tmp.add(received.owner);
-                            server.roomList.put(received.roomName, tmp);
+                                ArrayList<String> tmp = server.roomList.get(received.roomName);
+                                tmp.add(received.owner);
+                                server.roomList.put(received.roomName, tmp);
+                                String[] liste = new String[server.roomList.get(received.roomName).size()];
+                                for (int i = 0; i < liste.length; i++) {
+                                liste[i] = server.roomList.get(received.roomName).get(i);
+                            }
                             Message roomInfo = new Message(Message.messageType.PrivateRoomUpdated);
                             roomInfo.roomName = received.roomName;
                             roomInfo.roomList = server.roomList;
+                            roomInfo.userList = server.roomList.get(received.roomName);
+                            roomInfo.roomListforPrivate = liste;
                             server.Send(roomInfo);
 
                             

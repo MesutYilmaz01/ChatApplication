@@ -26,7 +26,7 @@ public class Server {
     public ServerListen listenThread;
     public int clientCount = 0;
     public ArrayList<ServerClient> Clients = new ArrayList<>();
-    public HashMap<String, ArrayList<String> > roomList = new HashMap<String, ArrayList<String>>();
+    public HashMap<String, ArrayList<String>> roomList = new HashMap<String, ArrayList<String>>();
     
     public Server(int _port) {
         try {
@@ -40,7 +40,6 @@ public class Server {
     }
 
     public void Send(Message msg) {
-
         for (ServerClient c : Clients) {
             try {
                 System.out.println("Server.Server.Send() => " + msg.type);
@@ -48,6 +47,7 @@ public class Server {
                     c.sOutput.writeObject(msg);
                 } else if (msg.userList.contains(c.name)) {
                     c.sOutput.writeObject(msg);
+                    c.sOutput.flush();
                     System.out.println("server send içindeyim");
                 }
                              

@@ -5,6 +5,7 @@
  */
 package Client;
 
+import GroupChat.ChatFrame;
 import GroupChat.ChatRoom;
 import Message.Message;
 import java.util.ArrayList;
@@ -215,17 +216,23 @@ public class MainFrame extends javax.swing.JFrame {
         createdRoom.userList = participiant;
         c.Send(createdRoom);
         
-        ChatRoom cr = new ChatRoom(participiant, createdRoom.roomName, c );
-        cr.frame.setVisible(true);
+        //ChatRoom cr = new ChatRoom(participiant, createdRoom.roomName, c );
+        // cr.frame.setVisible(true);
                 // TODO add your handling code here:
     }//GEN-LAST:event_createRoom1ActionPerformed
 
     private void connectRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectRoomBtnActionPerformed
+        
         String roomName = roomList.getSelectedValue();
+        ChatRoom cr = new ChatRoom(null, roomName, c);
+        c.chatFrameList.add(cr.frame);
+        
         Message msg = new Message(Message.messageType.PrivateRoomJoin);
         msg.roomName = roomName;
         msg.owner = c.userName;
         
+        c.Send(msg);
+        cr.frame.setVisible(true);
     }//GEN-LAST:event_connectRoomBtnActionPerformed
 
     /**
