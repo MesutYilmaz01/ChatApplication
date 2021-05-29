@@ -26,5 +26,6 @@ public class ChatRoom {
         client = _client;
         frame = new ChatFrame(client, userList, roomName);
         frame.setVisible(true);        
+        frame.users.setVisible(false);
     }
 }

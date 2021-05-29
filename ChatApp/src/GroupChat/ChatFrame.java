@@ -23,6 +23,7 @@ public class ChatFrame extends javax.swing.JFrame {
     public String roomName;
     public ArrayList<String> userList;
     public boolean flag = true;
+    public boolean isPrivateRoom = false;
     public ChatFrame(Client _client, ArrayList<String> _userList, String _roomName) {
         initComponents();
         client = _client;
@@ -138,7 +139,13 @@ public class ChatFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
         Message msg = new Message(Message.messageType.ChatGroupConnection);
         msg.content = message.getText();
-        msg.owner = owner;
+        if(isPrivateRoom){
+            msg.owner = roomName;
+            msg.isPrivateRoom= true;
+            msg.content = client.userName+ " : " + msg.content;
+            
+        }else 
+            msg.owner = owner;
         msg.userList = userList;
         //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
         

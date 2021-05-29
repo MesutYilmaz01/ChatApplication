@@ -119,7 +119,7 @@ class Listen extends Thread {
                         for(int i = 0; i< client.chatFrameList.size(); i++){ 
                            System.out.println();
                             ChatFrame cf = client.chatFrameList.get(i);
-                            if(received.userList.contains(cf.roomName))
+                            if(received.userList.contains(cf.roomName) && !received.isPrivateRoom)
                             {
                                 String text = "";
                                 text = cf.chatField.getText();
@@ -127,6 +127,13 @@ class Listen extends Thread {
                                 cf.chatField.setText(text + newMsg);
                                 append = false;
                                 System.out.println("1");
+                            }else if(received.isPrivateRoom && cf.roomName.equals(received.owner)){
+                                append = false;
+                                String text = "";
+                                text = cf.chatField.getText();
+                                String newMsg = received.content.toString() + "\n";
+                                cf.chatField.setText(text + newMsg);
+                                System.out.println("Private room triggered");
                             }
                         }
                         if(append){
@@ -153,14 +160,17 @@ class Listen extends Thread {
                          for (int i = 0; i < client.chatFrameList.size(); i++) {
                             if(client.chatFrameList.get(i).roomName.equals(received.roomName))
                             {
+                                client.chatFrameList.get(i).userList = new ArrayList<String>();
                                 DefaultListModel<String> dm = new DefaultListModel<>();
                                 for (int j = 0; j < received.roomListforPrivate.length; j++) {
                                     dm.add(j, received.roomListforPrivate[j]);
+                                    client.chatFrameList.get(i).userList.add(received.roomListforPrivate[j]);
                                 }
 //                                for (int j = 0; j < received.roomList.get(received.roomName).size(); j++) {
 //                                    dm.add(j, received.roomList.get(received.roomName).get(j));
 //                                }
                                 client.chatFrameList.get(i).users.setModel(dm);
+                                client.chatFrameList.get(i).users.setVisible(true);
                             }
                         }
                         break;

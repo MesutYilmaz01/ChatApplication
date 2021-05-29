@@ -21,6 +21,7 @@ public class Message implements java.io.Serializable{
     public Object content;
     public ArrayList<String> userList;
     public String roomName;
+    public boolean isPrivateRoom = false;
     public HashMap<String, ArrayList<String>> roomList;
     public String[] roomListforPrivate;
     public Message(messageType _type){

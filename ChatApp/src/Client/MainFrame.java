@@ -206,6 +206,7 @@ public class MainFrame extends javax.swing.JFrame {
         participiant.add(c.userName);
         participiant.add(userList.getSelectedValue().toString());
         ChatRoom cr = new ChatRoom(participiant, userList.getSelectedValue().toString(),c);
+        
     }//GEN-LAST:event_privateChat1ActionPerformed
 
     private void createRoom1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createRoom1ActionPerformed
@@ -225,6 +226,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         String roomName = roomList.getSelectedValue();
         ChatRoom cr = new ChatRoom(null, roomName, c);
+        cr.frame.isPrivateRoom = true;
         c.chatFrameList.add(cr.frame);
         
         Message msg = new Message(Message.messageType.PrivateRoomJoin);
