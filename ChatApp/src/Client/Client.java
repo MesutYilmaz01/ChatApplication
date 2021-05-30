@@ -7,10 +7,14 @@ package Client;
 
 import GroupChat.ChatFrame;
 import Message.Message;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -18,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import java.io.File;
 
 /**
  *
@@ -30,8 +35,9 @@ public class Client {
     public ObjectOutputStream sOutput;
     public Listen listen;
     public MainFrame mf;
-    public ArrayList<ChatFrame> chatFrameList ;
+    public ArrayList<ChatFrame> chatFrameList;
     public String userName;
+
     public void Start(String ip, int port, Entry e, String _userName) {
         e.setVisible(false);
         mf = new MainFrame(this);
@@ -80,8 +86,8 @@ public class Client {
 class Listen extends Thread {
 
     Client client;
-    DefaultListModel<String> modelRoomList = new DefaultListModel<String> ();
-    
+    DefaultListModel<String> modelRoomList = new DefaultListModel<String>();
+
     Listen(Client _client) {
         client = _client;
     }
@@ -91,64 +97,72 @@ class Listen extends Thread {
         while (client.socket.isConnected()) {
             try {
                 Message received = (Message) (client.sInput.readObject());
-                System.out.println("Soket Mesaj Aldı.."+received.type);
+                System.out.println("Soket Mesaj Aldı.." + received.type);
                 switch (received.type) {
                     case ConnectedClients:
                         ArrayList<String> users = (ArrayList<String>) (received.content);
                         DefaultListModel<String> model = new DefaultListModel<String>();
                         for (int i = 0; i < users.size(); i++) {
                             model.add(i, users.get(i));
-                            System.out.println(users.get(i)+"\n");
+                            System.out.println(users.get(i) + "\n");
                         }
                         client.mf.userList.setModel(model);
                         client.mf.user.setText(client.userName);
-                        
+
                         // Set Private room list
-                        
-                        int roomIndex  =0;
-                        
-                        for(Map.Entry<String, ArrayList<String>> room : received.roomList.entrySet())
-                        {
-                                modelRoomList.add(roomIndex++, room.getKey());
+                        int roomIndex = 0;
+
+                        for (Map.Entry<String, ArrayList<String>> room : received.roomList.entrySet()) {
+                            modelRoomList.add(roomIndex++, room.getKey());
                         }
                         client.mf.roomList.setModel(modelRoomList);
-                        
+
                         break;
                     case ChatGroupConnection:
-                        boolean append = true;
-                        for(int i = 0; i< client.chatFrameList.size(); i++){ 
-                           System.out.println();
-                            ChatFrame cf = client.chatFrameList.get(i);
-                            if(received.userList.contains(cf.roomName) && !received.isPrivateRoom)
-                            {
-                                String text = "";
-                                text = cf.chatField.getText();
-                                String newMsg = received.owner + " : " + received.content.toString() + "\n";
-                                cf.chatField.setText(text + newMsg);
-                                append = false;
-                                System.out.println("1");
-                            }else if(received.isPrivateRoom && cf.roomName.equals(received.owner)){
-                                append = false;
-                                String text = "";
-                                text = cf.chatField.getText();
-                                String newMsg = received.content.toString() + "\n";
-                                cf.chatField.setText(text + newMsg);
-                                System.out.println("Private room triggered");
+                        if (received.hasFile != null) {
+                            String home = System.getProperty("user.home");
+                            File file= new File(home+"/Downloads/"+client.userName+"_"+received.hasFile);
+                           OutputStream os = new FileOutputStream(file); 
+                           byte[] fileContent = (byte[])received.content;
+                           os.write(fileContent);
+                           os.close();
+                           
+                        } else {
+                            boolean append = true;
+                            for (int i = 0; i < client.chatFrameList.size(); i++) {
+                                System.out.println();
+                                ChatFrame cf = client.chatFrameList.get(i);
+                                if (received.userList.contains(cf.roomName) && !received.isPrivateRoom) {
+                                    String text = "";
+                                    text = cf.chatField.getText();
+                                    String newMsg = received.owner + " : " + received.content.toString() + "\n";
+                                    cf.chatField.setText(text + newMsg);
+                                    append = false;
+                                    System.out.println("1");
+                                } else if (received.isPrivateRoom && cf.roomName.equals(received.owner)) {
+                                    append = false;
+                                    String text = "";
+                                    text = cf.chatField.getText();
+                                    String newMsg = received.content.toString() + "\n";
+                                    cf.chatField.setText(text + newMsg);
+                                    System.out.println("Private room triggered");
+                                }
                             }
+                            if (append) {
+                                ArrayList<String> tmpChatUserList = new ArrayList<String>();
+                                tmpChatUserList.add(client.userName);
+                                tmpChatUserList.add(received.owner);
+                                client.chatFrameList.add(new ChatFrame(client, tmpChatUserList, received.owner));
+                                int newCFrameIndex = client.chatFrameList.size() - 1;
+                                String newMsg = received.owner + " : " + received.content.toString() + "\n";
+                                client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
+                                client.chatFrameList.get(newCFrameIndex).users.setVisible(false);
+
+                                client.chatFrameList.get(newCFrameIndex).setVisible(true);
+                                System.out.println("2");
+                            }
+                            append = true;
                         }
-                        if(append){
-                            ArrayList<String> tmpChatUserList = new ArrayList<String>();
-                            tmpChatUserList.add(client.userName);
-                            tmpChatUserList.add(received.owner);
-                            client.chatFrameList.add(new ChatFrame(client, tmpChatUserList, received.owner));
-                            int newCFrameIndex = client.chatFrameList.size() - 1; 
-                            String newMsg = received.owner + " : " + received.content.toString() + "\n";
-                            client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
-                            
-                            client.chatFrameList.get(newCFrameIndex).setVisible(true);
-                            System.out.println("2");
-                        }
-                        append=true;
                         System.out.println("ChatFram tetiklendi." + client.userName);
                         break;
                     case PrivateRoomList:
@@ -157,9 +171,8 @@ class Listen extends Thread {
                         client.mf.roomList.setModel(modelRoomList);
                         break;
                     case PrivateRoomUpdated:
-                         for (int i = 0; i < client.chatFrameList.size(); i++) {
-                            if(client.chatFrameList.get(i).roomName.equals(received.roomName))
-                            {
+                        for (int i = 0; i < client.chatFrameList.size(); i++) {
+                            if (client.chatFrameList.get(i).roomName.equals(received.roomName)) {
                                 client.chatFrameList.get(i).userList = new ArrayList<String>();
                                 DefaultListModel<String> dm = new DefaultListModel<>();
                                 for (int j = 0; j < received.roomListforPrivate.length; j++) {

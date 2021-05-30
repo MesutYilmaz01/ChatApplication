@@ -7,7 +7,14 @@ package GroupChat;
 
 import Client.Client;
 import Message.Message;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -24,6 +31,7 @@ public class ChatFrame extends javax.swing.JFrame {
     public ArrayList<String> userList;
     public boolean flag = true;
     public boolean isPrivateRoom = false;
+
     public ChatFrame(Client _client, ArrayList<String> _userList, String _roomName) {
         initComponents();
         client = _client;
@@ -33,6 +41,7 @@ public class ChatFrame extends javax.swing.JFrame {
         sender.setText(client.userName);
         receiver.setText(roomName);
     }
+
     private ChatFrame() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -48,20 +57,21 @@ public class ChatFrame extends javax.swing.JFrame {
 
         chatField = new java.awt.TextArea();
         message = new java.awt.TextField();
-        send = new javax.swing.JButton();
+        fileChoose = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         users = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
         sender = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         receiver = new javax.swing.JLabel();
+        send1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        send.setText("Gönder");
-        send.addActionListener(new java.awt.event.ActionListener() {
+        fileChoose.setText("Dosya Gönder");
+        fileChoose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sendActionPerformed(evt);
+                fileChooseActionPerformed(evt);
             }
         });
 
@@ -80,6 +90,13 @@ public class ChatFrame extends javax.swing.JFrame {
 
         receiver.setText("jLabel4");
 
+        send1.setText("Gönder");
+        send1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                send1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -88,9 +105,12 @@ public class ChatFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(22, 22, 22)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(message, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chatField, javax.swing.GroupLayout.DEFAULT_SIZE, 642, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chatField, javax.swing.GroupLayout.PREFERRED_SIZE, 642, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 468, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(31, 31, 31)
+                                .addComponent(fileChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
@@ -102,9 +122,9 @@ public class ChatFrame extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(receiver)
                         .addGap(69, 69, 69)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(send, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(send1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(65, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -121,34 +141,84 @@ public class ChatFrame extends javax.swing.JFrame {
                             .addComponent(sender)
                             .addComponent(jLabel3)
                             .addComponent(receiver))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(19, 19, 19)
-                        .addComponent(send, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(31, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(fileChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(send1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void sendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendActionPerformed
+    private void fileChooseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooseActionPerformed
+        Message msg = new Message(Message.messageType.ChatGroupConnection);
+        Message msgInform = new Message(Message.messageType.ChatGroupConnection);
+        JFileChooser fs = new JFileChooser();
+        fs.setDialogTitle("Dosya Kaydet");
+        int result = fs.showSaveDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File fi = fs.getSelectedFile();
+            byte[] mybytearray = new byte[(int) fi.length()];
+            try {
+                
+                FileInputStream fis = new FileInputStream(fi);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                bis.read(mybytearray, 0, mybytearray.length);
+                msg.content = mybytearray;
+                msg.hasFile = fi.getName();
+                if (isPrivateRoom) {
+                    msg.owner = roomName;
+                    msg.isPrivateRoom = true;
+                    //msg.content = client.userName + " : " + msg.content;
+                    msgInform.owner = roomName;
+                    msgInform.isPrivateRoom = true;
+                    msgInform.content = client.userName + " : " + msg.content;
+
+                } else {
+                    msg.owner = owner;
+                    msgInform.owner = owner;
+                }
+                msg.userList = userList;
+                msgInform.userList = userList;
+                //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
+
+                for (int i = 0; i < client.chatFrameList.size(); i++) {
+                    if (client.chatFrameList.contains(this)) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    client.chatFrameList.add(this); //her mesaj göndermede bunu clientliste ekleme problem
+                    flag = false;
+                }
+                msgInform.content = client.userName +" : "+ fi.getName()+ " isimli dosya indirilenler klasörünüze yüklendi...";
+                client.Send(msgInform);
+                client.Send(msg);
+            } catch (IOException ex) {
+                Logger.getLogger(ChatFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_fileChooseActionPerformed
+
+    private void send1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_send1ActionPerformed
         // TODO add your handling code here:
+        // TODO add your handling code haaaaaaaere:
         Message msg = new Message(Message.messageType.ChatGroupConnection);
         msg.content = message.getText();
-        if(isPrivateRoom){
+        if (isPrivateRoom) {
             msg.owner = roomName;
-            msg.isPrivateRoom= true;
-            msg.content = client.userName+ " : " + msg.content;
-            
-        }else 
+            msg.isPrivateRoom = true;
+            msg.content = client.userName + " : " + msg.content;
+
+        } else {
             msg.owner = owner;
+        }
         msg.userList = userList;
         //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
-        
+
         for (int i = 0; i < client.chatFrameList.size(); i++) {
             if (client.chatFrameList.contains(this)) {
                 flag = false;
@@ -160,7 +230,7 @@ public class ChatFrame extends javax.swing.JFrame {
         }
         client.Send(msg);
         message.setText("");
-    }//GEN-LAST:event_sendActionPerformed
+    }//GEN-LAST:event_send1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -199,12 +269,13 @@ public class ChatFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public java.awt.TextArea chatField;
+    public javax.swing.JButton fileChoose;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     public java.awt.TextField message;
     public javax.swing.JLabel receiver;
-    public javax.swing.JButton send;
+    public javax.swing.JButton send1;
     public javax.swing.JLabel sender;
     public javax.swing.JList<String> users;
     // End of variables declaration//GEN-END:variables
