@@ -11,7 +11,7 @@ package Client;
  */
 public class Test {
     public static void main(String[] args) {
-        Entry e = new Entry();
-        e.setVisible(true);
+        Entry e = new Entry(); //ip istenen adresi açar
+        e.setVisible(true); //görünümünü açar
     }
 }

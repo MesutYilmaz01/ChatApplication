@@ -17,14 +17,14 @@ import java.util.Map;
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    public Client c;
+    public Client c; //client için değişken oluşturulur
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame(Client _c) {
         initComponents();
-        c = _c;
+        c = _c; //gelen client değişkene atlır
 
     }
 
@@ -194,47 +194,59 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void SendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendActionPerformed
         // TODO add your handling code here:
-        Message msg = new Message(Message.messageType.Text);
-        msg.content = message.getText();
-        c.Send(msg);
-        message.setText("");
+        Message msg = new Message(Message.messageType.Text); //gönderilecek mesaj için obje oluşturulur
+        msg.content = message.getText();    //bilgi mesaja eklenir
+        c.Send(msg);//gönderilir
+        message.setText("");    //textfield boşaltılır
     }//GEN-LAST:event_SendActionPerformed
 
     private void privateChat1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_privateChat1ActionPerformed
-        // TODO add your handling code here:
-        ArrayList<String> participiant = new ArrayList<String>();
-        participiant.add(c.userName);
-        participiant.add(userList.getSelectedValue().toString());
-        ChatRoom cr = new ChatRoom(participiant, userList.getSelectedValue().toString(),c);
-        
+        //eğer seçilen değer null ise veya kendisine eşitse birşey yapma
+        if (userList.getSelectedValue().toString().equals(null) || userList.getSelectedValue().toString().equals(c.userName)) {
+
+        } else {    //yap
+            ArrayList<String> participiant = new ArrayList<String>();   //chat için gerekli kullanıcıları tutacak arraylist oluşturulur
+            participiant.add(c.userName);   //gönderen kişi bu listeye eklenir
+            participiant.add(userList.getSelectedValue().toString());   //alacak kişi listeye eklenir
+            ChatRoom cr = new ChatRoom(participiant, userList.getSelectedValue().toString(), c); //chatroom objesi oluşturulur
+
+        }
     }//GEN-LAST:event_privateChat1ActionPerformed
 
     private void createRoom1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createRoom1ActionPerformed
-        Message createdRoom = new Message(Message.messageType.PrivateRoomCreated);
-        createdRoom.roomName = privateRoomName.getText();
-        ArrayList<String> participiant = new ArrayList<String>();
-        participiant.add(c.userName);
-        createdRoom.userList = participiant;
-        c.Send(createdRoom);
-        
-        //ChatRoom cr = new ChatRoom(participiant, createdRoom.roomName, c );
-        // cr.frame.setVisible(true);
-                // TODO add your handling code here:
+        if (privateRoomName.getText().equals("")) { //chatroom ado boşsa bişey yapma 
+            
+        }else{
+        boolean flag = false;
+        for (int i = 0; i < roomList.getModel().getSize(); i++) {   //chatroom daha önce mevcutsa bayrağı kaldır
+            if (roomList.getModel().getElementAt(i).equals(privateRoomName.getText())) {
+                flag = true;
+            }
+        }
+        if (flag == false) {    //değilse odayı ekle
+            Message createdRoom = new Message(Message.messageType.PrivateRoomCreated);  //oda oluşturulması için mesaj oluşturulur
+            createdRoom.roomName = privateRoomName.getText();   // oda adı mesaja girilir
+            ArrayList<String> participiant = new ArrayList<String>();   //odanın katılımcı listesi oluşturulur
+            participiant.add(c.userName);   //katılımcılara gönderen kişi eklenir
+            createdRoom.userList = participiant;    //liste mesaja eklenir
+            c.Send(createdRoom);    //gönderlir   
+        }
+        }
     }//GEN-LAST:event_createRoom1ActionPerformed
 
     private void connectRoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectRoomBtnActionPerformed
-        
-        String roomName = roomList.getSelectedValue();
-        ChatRoom cr = new ChatRoom(null, roomName, c);
-        cr.frame.isPrivateRoom = true;
-        c.chatFrameList.add(cr.frame);
-        
-        Message msg = new Message(Message.messageType.PrivateRoomJoin);
-        msg.roomName = roomName;
-        msg.owner = c.userName;
-        
-        c.Send(msg);
-        cr.frame.setVisible(true);
+
+        String roomName = roomList.getSelectedValue();  //bağlanılacak odanın adı alınır
+        ChatRoom cr = new ChatRoom(null, roomName, c);  //chatroom objesi oluşturulur ve frami oluşturur
+        cr.frame.isPrivateRoom = true;  //özel oda flağı kaldırılır
+        c.chatFrameList.add(cr.frame);  //frame listesine bu oluşan frame objesi eklenir
+
+        Message msg = new Message(Message.messageType.PrivateRoomJoin);// bu alanla ilgili mesaj tipi oluşturulur
+        msg.roomName = roomName;    //oda adı mesaja eklenir
+        msg.owner = c.userName; //oda sahibi mesaja eklenir
+
+        c.Send(msg);    //mesaj gönderilir
+        cr.frame.setVisible(true);  //frame açılır
     }//GEN-LAST:event_connectRoomBtnActionPerformed
 
     /**

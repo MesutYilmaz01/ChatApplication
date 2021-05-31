@@ -25,21 +25,22 @@ public class ChatFrame extends javax.swing.JFrame {
     /**
      * Creates new form ChatFrame
      */
-    public String owner;
-    public Client client;
-    public String roomName;
-    public ArrayList<String> userList;
-    public boolean flag = true;
-    public boolean isPrivateRoom = false;
+    public String owner;    //frame sahibi
+    public Client client;   //frame clieni
+    public String roomName; //frame roomname (eğer roomname bağlı ise)
+    public ArrayList<String> userList;  //roomdaki kişiler
+    public boolean flag = true; //aşşağıda kullanılacak flag
+    public boolean isPrivateRoom = false;   //mesaj gönderiliken gönderilicek flag
 
     public ChatFrame(Client _client, ArrayList<String> _userList, String _roomName) {
         initComponents();
+        //ilgili bilgiler constructerdan aınır ve değişkenlere atanır
         client = _client;
         owner = client.userName;
         roomName = _roomName;
         userList = _userList;
-        sender.setText(client.userName);
-        receiver.setText(roomName);
+        sender.setText(client.userName);    //sender kısmına client yazılır
+        receiver.setText(roomName); //alıcı kısmına mesaj alacak kişi yazılır
     }
 
     private ChatFrame() {
@@ -154,49 +155,53 @@ public class ChatFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void fileChooseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooseActionPerformed
-        Message msg = new Message(Message.messageType.ChatGroupConnection);
-        Message msgInform = new Message(Message.messageType.ChatGroupConnection);
-        JFileChooser fs = new JFileChooser();
-        fs.setDialogTitle("Dosya Kaydet");
-        int result = fs.showSaveDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File fi = fs.getSelectedFile();
-            byte[] mybytearray = new byte[(int) fi.length()];
+        Message msg = new Message(Message.messageType.ChatGroupConnection); //file gönderimi için mesaj oluşturulur
+        Message msgInform = new Message(Message.messageType.ChatGroupConnection);   //dosyadan önceki mesaj için mesaş oluşturulur
+        JFileChooser fs = new JFileChooser();   //dosya seçme objesi oluşturulur
+        fs.setDialogTitle("Dosya Kaydet");  //title ayarlanır
+        int result = fs.showSaveDialog(null);   //dialog açıldıysa resulta ona göre değer ata
+        if (result == JFileChooser.APPROVE_OPTION) {    //koşul geçerliyse
+            File fi = fs.getSelectedFile(); //seçili dosyayı  file a yaz
+            byte[] mybytearray = new byte[(int) fi.length()];   //dosyanın boyutu kadar byte array oluşturulur
             try {
-                
-                FileInputStream fis = new FileInputStream(fi);
-                BufferedInputStream bis = new BufferedInputStream(fis);
-                bis.read(mybytearray, 0, mybytearray.length);
-                msg.content = mybytearray;
-                msg.hasFile = fi.getName();
-                if (isPrivateRoom) {
-                    msg.owner = roomName;
-                    msg.isPrivateRoom = true;
-                    //msg.content = client.userName + " : " + msg.content;
-                    msgInform.owner = roomName;
-                    msgInform.isPrivateRoom = true;
-                    msgInform.content = client.userName + " : " + msg.content;
+                FileInputStream fis = new FileInputStream(fi);  //dosya aktarmak için obje oluşturulur
+                BufferedInputStream bis = new BufferedInputStream(fis); //buffer objesi oluşturulur
+                bis.read(mybytearray, 0, mybytearray.length);   //ilgili dosya buffera atılır
+                msg.content = mybytearray;  //byte array mesja eklenir
+                msg.hasFile = fi.getName(); //dosya adı da mesaja eklenir
+                if (isPrivateRoom) {    //oda özel oda ise
+                    msg.owner = roomName;   //odanın adı yüklenir
+                    msg.isPrivateRoom = true; //private flagı kaldırılır
+                    msgInform.owner = roomName; //önden gidecek mesajın room bilgisi de farklı mesaja girilir
+                    msgInform.isPrivateRoom = true; //buda private room olduğu için flag kaldırılır
+                    msgInform.content = client.userName + " : " + msg.content;  //mesaj formatı ayarlanır
 
                 } else {
-                    msg.owner = owner;
-                    msgInform.owner = owner;
+                    msg.owner = owner;  //eğer özel oda değilse iki kişilik mesajlaşmadır bu yüzden roomname yerine owner girilir
+                    msgInform.owner = owner;    //bunu için de aynısı geçerlidir
                 }
-                msg.userList = userList;
-                msgInform.userList = userList;
-                //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
+                ArrayList<String> tempUserList = (ArrayList<String>)userList.clone(); //referans değeri yüzünden normal mesajın gitmesini engellemek için kullanılır
+                msg.userList = userList;    //mesaja userlist de girilir
+                for (int i = 0; i < msg.userList.size(); i++) { //kendisine mesaj göndermesi engellenir
+                    if (msg.userList.get(i).equals(client.userName)) {
+                        msg.userList.remove(i);
+                    }
+                }
+                msgInform.userList = tempUserList;  //bilgilendirme içinde aynısı geçerlidir
 
-                for (int i = 0; i < client.chatFrameList.size(); i++) {
-                    if (client.chatFrameList.contains(this)) {
-                        flag = false;
+                for (int i = 0; i < client.chatFrameList.size(); i++) { //pencere daha önce açılmış mı diye kontrol yapılır
+                    if (client.chatFrameList.contains(this)) {  //for döngüsü ile liste dönülür. kendisi varsa birdaha eklenmemesi
+                        flag = false;                           //için flag false yapılır
                     }
                 }
                 if (flag) {
-                    client.chatFrameList.add(this); //her mesaj göndermede bunu clientliste ekleme problem
+                    client.chatFrameList.add(this); //eğer listede kendisi yoksa eklenebilir
                     flag = false;
                 }
+                //mesaj bilgilendirmesi formatlanır
                 msgInform.content = client.userName +" : "+ fi.getName()+ " isimli dosya indirilenler klasörünüze yüklendi...";
-                client.Send(msgInform);
-                client.Send(msg);
+                client.Send(msgInform); //mesaj gönderilir
+                client.Send(msg);   //dosya gönderilir
             } catch (IOException ex) {
                 Logger.getLogger(ChatFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -204,32 +209,27 @@ public class ChatFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_fileChooseActionPerformed
 
     private void send1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_send1ActionPerformed
-        // TODO add your handling code here:
-        // TODO add your handling code haaaaaaaere:
-        Message msg = new Message(Message.messageType.ChatGroupConnection);
-        msg.content = message.getText();
-        if (isPrivateRoom) {
-            msg.owner = roomName;
-            msg.isPrivateRoom = true;
-            msg.content = client.userName + " : " + msg.content;
-
+        Message msg = new Message(Message.messageType.ChatGroupConnection); //ilgili tipte mesaj oluşturulur
+        msg.content = message.getText();    //kullanıcının girdiği mesaj mesaja eklenir
+        if (isPrivateRoom) {    //eğer özel odaysa
+            msg.owner = roomName;   //mesaj sahibi girilir
+            msg.isPrivateRoom = true;   //mesajın özel olduğu belirtilir
+            msg.content = client.userName + " : " + msg.content;    //mesaj formatlanır
         } else {
-            msg.owner = owner;
+            msg.owner = owner;  //değilse mesaj sahibi client olur
         }
-        msg.userList = userList;
-        //açılan client de kendisi ekli olduğu için tekrar ekliyor bu yüzden iki kere yazıyor.
-
-        for (int i = 0; i < client.chatFrameList.size(); i++) {
-            if (client.chatFrameList.contains(this)) {
-                flag = false;
+        msg.userList = userList;    //mesajın gideceğ kişilerin listesi eklenir
+        for (int i = 0; i < client.chatFrameList.size(); i++) { //chatframe listesi for ile dönülür
+            if (client.chatFrameList.contains(this)) {  //eğer listede bu frame varsa
+                flag = false;   //flag kaldırılır
             }
         }
-        if (flag) {
-            client.chatFrameList.add(this); //her mesaj göndermede bunu clientliste ekleme problem
-            flag = false;
+        if (flag) { //flag kalkmamışsa
+            client.chatFrameList.add(this); //kendisi de listeye eklenir
+            flag = false;   //flag kaldırılır
         }
-        client.Send(msg);
-        message.setText("");
+        client.Send(msg);   //mesaj gönderilir
+        message.setText("");    //mesaj gönderme alanı boşaltılır
     }//GEN-LAST:event_send1ActionPerformed
 
     /**

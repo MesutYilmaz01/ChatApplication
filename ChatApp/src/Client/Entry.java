@@ -99,8 +99,8 @@ public class Entry extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(ip, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ip, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addComponent(port, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -119,9 +119,13 @@ public class Entry extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConnectActionPerformed
-        // TODO add your handling code here:
-        Client c = new Client();
-        c.Start(ip.getText(), Integer.parseInt(port.getText()), this, userName1.getText());
+        //alanlar boş ise birşey yapma
+        if (userName1.getText().equals("") || ip.getText().equals("") || port.getText().equals("")) {
+
+        } else {
+            Client c = new Client();    //yeni client oluşturulur
+            c.Start(ip.getText(), Integer.parseInt(port.getText()), this, userName1.getText()); //bilgiler gönderilir
+        }
     }//GEN-LAST:event_ConnectActionPerformed
 
     private void userName1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userName1ActionPerformed

@@ -21,34 +21,32 @@ import java.util.logging.Logger;
  */
 public class Server {
 
-    public ServerSocket ss;
-    public int port = 0;
-    public ServerListen listenThread;
-    public int clientCount = 0;
-    public ArrayList<ServerClient> Clients = new ArrayList<>();
-    public HashMap<String, ArrayList<String>> roomList = new HashMap<String, ArrayList<String>>();
+    public ServerSocket ss; //Kullanılacak soket
+    public int port = 0;    //Kullanılacak port
+    public ServerListen listenThread;   //Sunucuyu meşgul etmemek için oluşturulan dinleme threadi
+    public int clientCount = 0; //client sayısı
+    public ArrayList<ServerClient> Clients = new ArrayList<>(); //clientlerin tutulacağı dizi
+    public HashMap<String, ArrayList<String>> roomList = new HashMap<String, ArrayList<String>>();  //Grup konuşmaları için odalar ve içindeki kullanıcıların listesi
     
     public Server(int _port) {
         try {
-            port = _port;
-            ss = new ServerSocket(port);
-            listenThread = new ServerListen(this);
-            listenThread.start();
+            port = _port;   //Kullanıcıdan alınan port bilgisi atanır
+            ss = new ServerSocket(port);     //Bu portla yeni bir soket oluşturulur
+            listenThread = new ServerListen(this);  //Sunucuyu meşgul etmemek için oluşturulan thread atanır.
+            listenThread.start();   //thread baslatılarak sunucu bağlanacak clientleri dinlemeye başlar
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void Send(Message msg) {
-        for (ServerClient c : Clients) {
+    public void Send(Message msg) { //clientlere mesaj göndermek için kullanılan fonksiyon
+        for (ServerClient c : Clients) {    //tüm clientler dönülür
             try {
-                System.out.println("Server.Server.Send() => " + msg.type);
-                if (msg.userList == null) {
+                if (msg.userList == null) { //userlist null ise herkese gönderecek
                     c.sOutput.writeObject(msg);
-                } else if (msg.userList.contains(c.name)) {
-                    c.sOutput.writeObject(msg);
+                } else if (msg.userList.contains(c.name)) { //değilse sadece listedeki kişilere gönder
+                    c.sOutput.writeObject(msg); //mesajı gönder
                     c.sOutput.flush();
-                    System.out.println("server send içindeyim");
                 }
                              
             } catch (IOException ex) {
@@ -59,25 +57,24 @@ public class Server {
     }
 }
 
-class ServerListen extends Thread {
+class ServerListen extends Thread { //sunucuların bağlanmak isteyen clientları karşılayacağı thread classı
 
-    Server server;
+    Server server;  //Server classını tutmak için gerekli değişken
 
     public ServerListen(Server _s) {
-        server = _s;
+        server = _s;    //constructordan gelen değer buradaki servera atılır. Bu sayede server classındaki objelere erişilir
     }
 
     @Override
     public void run() {
-        while (!server.ss.isClosed()) {
+        while (!server.ss.isClosed()) { //server kapanana kadar dinle
             try {
-                System.out.println("Client Bekleniyor.");
-                Socket clientSocket = server.ss.accept();
-                System.out.println("Client Bağlandı");
+                Socket clientSocket = server.ss.accept();   //client geldiğinde kabul eet
+                //Bağlanan clientların her birini ayrı ayrı dinlemek gerektiği için her cliente bir thread atanır
                 ServerClient client = new ServerClient(clientSocket, server.clientCount, server);
-                server.clientCount++;
-                server.Clients.add(client);
-                client.listen.start();
+                server.clientCount++;   //client sayısı arttırılır
+                server.Clients.add(client); //bağlanan client listeye eklenir
+                client.listen.start();  //client dinlenmeye başlanır
 
             } catch (IOException ex) {
                 Logger.getLogger(ServerListen.class.getName()).log(Level.SEVERE, null, ex);

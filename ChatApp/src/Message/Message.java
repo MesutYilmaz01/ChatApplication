@@ -15,16 +15,16 @@ import java.util.Map;
  */
 public class Message implements java.io.Serializable{
     public enum messageType {Name,Text,ConnectedClients, ChatGroupConnection,
-        PrivateRoomUpdated, PrivateRoomJoin, PrivateRoomList, PrivateRoomCreated};
-    public messageType type;
-    public String owner;
-    public Object content;
-    public ArrayList<String> userList;
-    public String roomName;
-    public boolean isPrivateRoom = false;
-    public HashMap<String, ArrayList<String>> roomList;
-    public String[] roomListforPrivate;
-    public String hasFile = null;
+        PrivateRoomUpdated, PrivateRoomJoin, PrivateRoomList, PrivateRoomCreated};  //ilgili alanlara göre mesaj tipleri belirlenir
+    public messageType type;    //mesaj tipi
+    public String owner;    //sahibi
+    public Object content;  //içerik
+    public ArrayList<String> userList;  //mesajın gideceği kişilerin listesi
+    public String roomName; //oda adı
+    public boolean isPrivateRoom = false;   //chat gru chatmi iki kişilik mi
+    public HashMap<String, ArrayList<String>> roomList; //oda listesi ve içerideki kullanıcılar
+    public String[] roomListforPrivate; //özel oda ise kullanıcı listeleri alınır
+    public String hasFile = null;   //dosya mı değil mi
     public Message(messageType _type){
         type = _type;
     }

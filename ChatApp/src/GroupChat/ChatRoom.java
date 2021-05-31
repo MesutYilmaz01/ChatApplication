@@ -15,17 +15,18 @@ import javax.swing.DefaultListModel;
  */
 public class ChatRoom {
 
-    public String roomName;
-    public ArrayList<String> userList;
-    public ChatFrame frame;
-    public Client client;
+    public String roomName; //oda adı
+    public ArrayList<String> userList;  //odadaki kullanıcılar
+    public ChatFrame frame; //frame objesi
+    public Client client;   //client
     public ChatRoom( ArrayList<String> _userList, String _roomName, Client _client)
     {
+        //bu bilgiler ile frame oluşturulur
         roomName = _roomName;
         userList = _userList;
         client = _client;
         frame = new ChatFrame(client, userList, roomName);
-        frame.setVisible(true);        
-        frame.users.setVisible(false);
+        frame.setVisible(true);        // frame görünür hale getirilir
+        frame.users.setVisible(false);  // tekli mesaj ise sağdaki listenin görünümü engellenir
     }
 }

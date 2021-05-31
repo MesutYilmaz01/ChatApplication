@@ -30,37 +30,36 @@ import java.io.File;
  */
 public class Client {
 
-    public Socket socket;
-    public ObjectInputStream sInput;
-    public ObjectOutputStream sOutput;
-    public Listen listen;
-    public MainFrame mf;
-    public ArrayList<ChatFrame> chatFrameList;
-    public String userName;
+    public Socket socket;   //Soket oluşturulur
+    public ObjectInputStream sInput;    //Veri yazma objesi oluşturulur
+    public ObjectOutputStream sOutput;  //Gelen veriyi okuma objesi oluşturulur
+    public Listen listen;   //Cientin sunucudan gelen mesajları dinlemesi için thread oluşturulur
+    public MainFrame mf;    //Programın ana frame'i
+    public ArrayList<ChatFrame> chatFrameList;  // Diğer kullanıcılar ile konuştuğu framelerin listesi
+    public String userName; //clientin adı
 
     public void Start(String ip, int port, Entry e, String _userName) {
-        e.setVisible(false);
-        mf = new MainFrame(this);
-        mf.setVisible(true);
-        chatFrameList = new ArrayList<ChatFrame>();
+        e.setVisible(false);    //kullanıcı adı girilen ekran kapatılır
+        mf = new MainFrame(this);   //ana frame oluşturulur
+        mf.setVisible(true);    //görünmesi açılır
+        chatFrameList = new ArrayList<ChatFrame>(); //chatframe listesi başlatılır
         try {
-            socket = new Socket(ip, port);
-            System.out.println("Servera Bağlandım!");
-            sInput = new ObjectInputStream(socket.getInputStream());
-            sOutput = new ObjectOutputStream(socket.getOutputStream());
-            listen = new Listen(this);
-            listen.start();
-            userName = _userName;
-            Message name = new Message(Message.messageType.Name);
+            socket = new Socket(ip, port);  //ilgili bilgilerle port açılır ve sunucuya bağlanılır
+            sInput = new ObjectInputStream(socket.getInputStream());    //gelen veriyi okuma objesş oluşturulur
+            sOutput = new ObjectOutputStream(socket.getOutputStream()); //veri yazma objesi oluşturulur
+            listen = new Listen(this);  //sunucuyu dinlemek için thread olşturulur
+            listen.start(); //dinleme başlar
+            userName = _userName;   //verilen kullanıcı adı cliente atanır
+            Message name = new Message(Message.messageType.Name);   //alınan kullanıcı adı mesaja yazılır
             name.content = userName;
-            Send(name);
+            Send(name); //sunucuya gönderilir
 
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void Stop() {
+    public void Stop() {    //clienti durdurma fonksiyonu
         if (socket != null) {
             try {
                 sOutput.flush();
@@ -72,9 +71,9 @@ public class Client {
         }
     }
 
-    public void Send(Message msg) {
+    public void Send(Message msg) { //clientden mesaj yazma fonksiyonu
         try {
-            sOutput.writeObject(msg);
+            sOutput.writeObject(msg);   //gelen mesaj porta yazılır
             sOutput.flush();
         } catch (IOException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -83,115 +82,102 @@ public class Client {
     }
 }
 
-class Listen extends Thread {
+class Listen extends Thread {   //sunucuyu dinleme threadi
 
-    Client client;
-    DefaultListModel<String> modelRoomList = new DefaultListModel<String>();
+    Client client;  //client objelerine erişmek için client değişkeni tutulur
+    DefaultListModel<String> modelRoomList = new DefaultListModel<String>(); //listeye yazmak için gerekli defaultmodel
 
     Listen(Client _client) {
-        client = _client;
+        client = _client;   //constructerdan gelen client ilgili değişkene atılır
     }
 
     @Override
     public void run() {
-        while (client.socket.isConnected()) {
+        while (client.socket.isConnected()) {   //client bağlı olduğu sürece dinlemde bekler
             try {
-                Message received = (Message) (client.sInput.readObject());
-                System.out.println("Soket Mesaj Aldı.." + received.type);
-                switch (received.type) {
-                    case ConnectedClients:
-                        ArrayList<String> users = (ArrayList<String>) (received.content);
+                Message received = (Message) (client.sInput.readObject());  //mesaj geelince okuduğu bilgiyi mesaj tipine çevirir
+                switch (received.type) {    //mesajın tipine göre ilgili alana gider
+                    case ConnectedClients:  // Yeni bağlanan kulanıcıya kullanıcı listesini göndermek için kullannılır
+                        ArrayList<String> users = (ArrayList<String>) (received.content);   //gelen bilgi arrayliste aktarılır
                         DefaultListModel<String> model = new DefaultListModel<String>();
                         for (int i = 0; i < users.size(); i++) {
-                            model.add(i, users.get(i));
-                            System.out.println(users.get(i) + "\n");
+                            model.add(i, users.get(i)); //arraylist den delisteye bastırılır
                         }
                         client.mf.userList.setModel(model);
-                        client.mf.user.setText(client.userName);
+                        client.mf.user.setText(client.userName);    //labelda clientin adı  görünür
 
                         // Set Private room list
                         int roomIndex = 0;
 
                         for (Map.Entry<String, ArrayList<String>> room : received.roomList.entrySet()) {
-                            modelRoomList.add(roomIndex++, room.getKey());
+                            modelRoomList.add(roomIndex++, room.getKey());  //burada da özel chat odaları ilgili listeye yazılır
                         }
                         client.mf.roomList.setModel(modelRoomList);
 
                         break;
-                    case ChatGroupConnection:
-                        if (received.hasFile != null) {
-                            String home = System.getProperty("user.home");
-                            File file= new File(home+"/Downloads/"+client.userName+"_"+received.hasFile);
-                           OutputStream os = new FileOutputStream(file); 
-                           byte[] fileContent = (byte[])received.content;
-                           os.write(fileContent);
+                    case ChatGroupConnection: //grup konuşmaları için kullanılır
+                        if (received.hasFile != null) { //gelen şey bir dosyaise buraya girer
+                            String home = System.getProperty("user.home");  //kullanıcı adı dizini alınır
+                            File file= new File(home+"/Downloads/"+client.userName+"_"+received.hasFile); //kaydedilecek path ayarlanır
+                           OutputStream os = new FileOutputStream(file); //kaydetmek için outputstream oluşturulur
+                           byte[] fileContent = (byte[])received.content;   //gelen bilgi uzunluğunda byte array oluşturulur
+                           os.write(fileContent);   //ilgili bilgi kaydedilir
                            os.close();
                            
-                        } else {
-                            boolean append = true;
-                            for (int i = 0; i < client.chatFrameList.size(); i++) {
-                                System.out.println();
-                                ChatFrame cf = client.chatFrameList.get(i);
-                                if (received.userList.contains(cf.roomName) && !received.isPrivateRoom) {
+                        } else {    //gelen şey dosya değil ise buraya girer
+                            boolean append = true;  //daha önce bu kullanıcıdan mesaj alınmış mı bunu anlamak için flag tutulur
+                            for (int i = 0; i < client.chatFrameList.size(); i++) { //clientin framelistesi kadar dönülür
+                                ChatFrame cf = client.chatFrameList.get(i); //her frame sıra ile alınır
+                                if (received.userList.contains(cf.roomName) && !received.isPrivateRoom) { //bu chatframe kullanıcılar arasında var mı? ve iki kişilik bir sohbet mi?
                                     String text = "";
                                     text = cf.chatField.getText();
-                                    String newMsg = received.owner + " : " + received.content.toString() + "\n";
-                                    cf.chatField.setText(text + newMsg);
-                                    append = false;
-                                    System.out.println("1");
-                                } else if (received.isPrivateRoom && cf.roomName.equals(received.owner)) {
-                                    append = false;
+                                    String newMsg = received.owner + " : " + received.content.toString() + "\n"; //gelen mesajı formatla
+                                    cf.chatField.setText(text + newMsg);   //chatfrme ekranına bas
+                                    append = false; //diğer alana girmesini engellemek için flag değiş
+                                } else if (received.isPrivateRoom && cf.roomName.equals(received.owner)) { //grup chati ve frameler arasında mevcut ise
+                                    append = false; //yine diğer tarafa girmesini engelle
                                     String text = "";
                                     text = cf.chatField.getText();
-                                    String newMsg = received.content.toString() + "\n";
-                                    cf.chatField.setText(text + newMsg);
-                                    System.out.println("Private room triggered");
+                                    String newMsg = received.content.toString() + "\n"; //mesajı formatla
+                                    cf.chatField.setText(text + newMsg);    //gönder
                                 }
                             }
-                            if (append) {
-                                ArrayList<String> tmpChatUserList = new ArrayList<String>();
-                                tmpChatUserList.add(client.userName);
-                                tmpChatUserList.add(received.owner);
-                                client.chatFrameList.add(new ChatFrame(client, tmpChatUserList, received.owner));
-                                int newCFrameIndex = client.chatFrameList.size() - 1;
-                                String newMsg = received.owner + " : " + received.content.toString() + "\n";
-                                client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg);
-                                client.chatFrameList.get(newCFrameIndex).users.setVisible(false);
-
-                                client.chatFrameList.get(newCFrameIndex).setVisible(true);
-                                System.out.println("2");
+                            if (append) {   //flag hala true ise bu kişiye ilk kez mesaj geliyor demektir
+                                ArrayList<String> tmpChatUserList = new ArrayList<String>(); //geçici bir user arraylisti oluştur
+                                tmpChatUserList.add(client.userName);   //gönderilecek listeye kendini ekle
+                                tmpChatUserList.add(received.owner);    //mesajı göndereni de gönderilecekler listesine ekle
+                                client.chatFrameList.add(new ChatFrame(client, tmpChatUserList, received.owner)); //yeni bir frame oluştur
+                                int newCFrameIndex = client.chatFrameList.size() - 1;   //sondaki elemanın indexini al (çünkü sona ekliyor )
+                                String newMsg = received.owner + " : " + received.content.toString() + "\n";    //gelen mesajı formatla
+                                client.chatFrameList.get(newCFrameIndex).chatField.setText(newMsg); //mesajı ekrana bas
+                                client.chatFrameList.get(newCFrameIndex).users.setVisible(false);   //sağdaki listeyi tek kişi olduğu için kapat
+                                client.chatFrameList.get(newCFrameIndex).setVisible(true);  //frami ekrana çıkart
                             }
-                            append = true;
+                            append = true; //flagi geri true yap
                         }
-                        System.out.println("ChatFram tetiklendi." + client.userName);
                         break;
-                    case PrivateRoomList:
-                        System.out.println("privateRoomList run => " + received.roomName);
-                        modelRoomList.add(modelRoomList.size(), received.roomName);
+                    case PrivateRoomList:   //kurulan yeni oda bilgisi için kullanılır
+                        modelRoomList.add(modelRoomList.size(), received.roomName); //gelen oda listesini frameinde gösterir
                         client.mf.roomList.setModel(modelRoomList);
                         break;
-                    case PrivateRoomUpdated:
-                        for (int i = 0; i < client.chatFrameList.size(); i++) {
-                            if (client.chatFrameList.get(i).roomName.equals(received.roomName)) {
-                                client.chatFrameList.get(i).userList = new ArrayList<String>();
-                                DefaultListModel<String> dm = new DefaultListModel<>();
-                                for (int j = 0; j < received.roomListforPrivate.length; j++) {
-                                    dm.add(j, received.roomListforPrivate[j]);
-                                    client.chatFrameList.get(i).userList.add(received.roomListforPrivate[j]);
+                    case PrivateRoomUpdated:    //biri odaya girdiğinde odadaki herkese girdiğine dair mesaj gider
+                        for (int i = 0; i < client.chatFrameList.size(); i++) { //ilgili frame for ile aranır
+                            if (client.chatFrameList.get(i).roomName.equals(received.roomName)) {   //bulunduğunda
+                                client.chatFrameList.get(i).userList = new ArrayList<String>(); //null hatası vermemesi için arrayliste atanır
+                                DefaultListModel<String> dm = new DefaultListModel<>(); //ekrana basmak çin listmodel olusturulur
+                                for (int j = 0; j < received.roomListforPrivate.length; j++) {  //gelen liste for ile dönülür
+                                    dm.add(j, received.roomListforPrivate[j]);  //hepsi default modele eklenir
+                                    client.chatFrameList.get(i).userList.add(received.roomListforPrivate[j]);   //clientin userlistine eklenir
                                 }
-//                                for (int j = 0; j < received.roomList.get(received.roomName).size(); j++) {
-//                                    dm.add(j, received.roomList.get(received.roomName).get(j));
-//                                }
-                                client.chatFrameList.get(i).users.setModel(dm);
-                                client.chatFrameList.get(i).users.setVisible(true);
+                                client.chatFrameList.get(i).users.setModel(dm); //model ekrana basılır
+                                client.chatFrameList.get(i).users.setVisible(true); // liste görünür hale getirilir
                             }
                         }
                         break;
-                    case Text:
-                        String temp = client.mf.chat.getText();
-                        temp += received.content.toString() + "\n";
-                        System.out.println("Text tetiklendi." + client.userName);
-                        client.mf.chat.setText(temp);
+                    case Text:  //genel mesaj geldiğinde çalışır
+                        String temp = client.mf.chat.getText(); //clientin güncel hali alınır
+                        temp += received.content.toString() + "\n"; //yeni mesaj üzerine eklenir
+                        client.mf.chat.setText(temp);   //ekrana basılır
                         break;
                 }
             } catch (IOException ex) {
